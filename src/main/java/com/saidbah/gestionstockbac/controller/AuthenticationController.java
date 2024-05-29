@@ -6,8 +6,9 @@ import com.saidbah.gestionstockbac.dto.request.RegisterRequest;
 import com.saidbah.gestionstockbac.entity.User;
 import com.saidbah.gestionstockbac.exception.StatusCode;
 import com.saidbah.gestionstockbac.repository.UserRepository;
-import com.saidbah.gestionstockbac.service.AuthenticationService;
-import com.saidbah.gestionstockbac.utils.ResponseEntityBuilder;
+import com.saidbah.gestionstockbac.service.AuthService;
+import com.saidbah.gestionstockbac.service.Impl.LogService;
+import com.saidbah.gestionstockbac.utils.Helpers;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -29,34 +30,31 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class AuthenticationController {
 
-    private final AuthenticationService authenticationService;
+    private final AuthService authenticationService;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final Path location = Paths.get("D:\\images\\users");
     private Path fileLocation;
+    private final LogService logService;
 
     @PostMapping("/register")
-    public ResponseEntity<ApiResponse<Object>> register(
+    public ResponseEntity register(
             @RequestBody RegisterRequest request
     ) {
         var response = authenticationService.register(request);
-        return ResponseEntityBuilder.buildResponseEntityObjet(
-                response,
-                StatusCode.USER_REGISTER_SUCCESSFULLY.getCode(),
-                StatusCode.USER_REGISTER_SUCCESSFULLY.getMessage()
-        );
+        logService.log(Helpers.LogLevel.INFO, "@AuthenticationController-register", "L'utilisateur a été ajouté avec succès.");
+        return ResponseEntity.ok().body(new ApiResponse(response, StatusCode.USER_REGISTER_SUCCESSFULLY.getCode(),
+                StatusCode.USER_REGISTER_SUCCESSFULLY.getMessage()));
     }
 
     @PostMapping("/authenticate")
-    public ResponseEntity<ApiResponse<Object>> authenticate(
+    public ResponseEntity authenticate(
             @RequestBody AuthenticationRequest request
     ){
         var response = authenticationService.authenticate(request);
-        return ResponseEntityBuilder.buildResponseEntityObjet(
-                response,
-                StatusCode.USER_AUTHENTICATED_SUCCESSFULLY.getCode(),
-                StatusCode.USER_AUTHENTICATED_SUCCESSFULLY.getMessage()
-        );
+        logService.log(Helpers.LogLevel.INFO, "@AuthenticationController-authenticate", "L'utilisateur connecté(e) avec succès.");
+        return   ResponseEntity.ok().body(new ApiResponse(response, StatusCode.USER_AUTHENTICATED_SUCCESSFULLY.getCode(),
+                StatusCode.USER_AUTHENTICATED_SUCCESSFULLY.getMessage()));
     }
 
     @PostMapping("/download-img/{userId}")
