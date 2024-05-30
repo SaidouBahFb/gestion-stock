@@ -2,8 +2,7 @@ package com.saidbah.gestionstockbac.controller;
 
 import com.saidbah.gestionstockbac.apiResponse.ApiResponse;
 import com.saidbah.gestionstockbac.dto.request.CompanyRequest;
-import com.saidbah.gestionstockbac.dto.response.FullCompanyResponse;
-import com.saidbah.gestionstockbac.entity.Company;
+import com.saidbah.gestionstockbac.dto.response.CompanyResponse;
 import com.saidbah.gestionstockbac.exception.EntityNotFoundException;
 import com.saidbah.gestionstockbac.repository.CompanyRepository;
 import com.saidbah.gestionstockbac.service.CompanyService;
@@ -24,7 +23,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/v1/company")
+@RequestMapping("/api/v1/companyResponse")
 @AllArgsConstructor
 public class CompanyController {
     private final CompanyService companyService;
@@ -34,19 +33,19 @@ public class CompanyController {
     @PostMapping("/create")
     public ResponseEntity<ApiResponse<Object>> create(@RequestBody CompanyRequest request) {
         var response = companyService.create(request);
-        return ResponseEntityBuilder.buildResponseEntityObjet(response, 200, "Company added successfully");
+        return ResponseEntityBuilder.buildResponseEntityObjet(response, 200, "CompanyResponse added successfully");
     }
 
     @GetMapping("/all")
-    public ResponseEntity<ApiResponse<List<FullCompanyResponse>>> getAllUsers() {
-        List<FullCompanyResponse> response = companyService.getAllCompanies();
+    public ResponseEntity<ApiResponse<List<CompanyResponse>>> getAllUsers() {
+        List<CompanyResponse> response = companyService.getAllCompanies();
         return ResponseEntityBuilder.buildResponseEntityList(response, 200, "List of all companies retrieved successfully.");
     }
 
     @PutMapping("/update/{id}")
     public ResponseEntity<ApiResponse<Object>> update(@PathVariable Long id, @RequestBody CompanyRequest request) {
-        FullCompanyResponse response = companyService.updateCompany(id, request);
-        return ResponseEntityBuilder.buildResponseEntityObjet(response, 200, "Company updated successfully");
+        CompanyResponse response = companyService.updateCompany(id, request);
+        return ResponseEntityBuilder.buildResponseEntityObjet(response, 200, "CompanyResponse updated successfully");
     }
 
     @PostMapping("/download-img/{companyId}")
@@ -64,7 +63,7 @@ public class CompanyController {
 
         Files.copy(img.getInputStream(), fileLocation, StandardCopyOption.REPLACE_EXISTING);
 
-        Company company = companyRepository.findById(companyId).orElseThrow(() -> new EntityNotFoundException("Company not found", 400));
+        com.saidbah.gestionstockbac.entity.Company company = companyRepository.findById(companyId).orElseThrow(() -> new EntityNotFoundException("CompanyResponse not found", 400));
         company.setPhoto(fileLocation.toString());
         companyRepository.save(company);
 
@@ -78,7 +77,7 @@ public class CompanyController {
     @PutMapping("/change-status/{id}")
     public ResponseEntity<ApiResponse<Object>> changeStatus(@PathVariable Long id, @RequestParam String status){
         companyService.changeCompanyStatus(id, status);
-        return ResponseEntityBuilder.buildResponseEntityObjet(null, 200, "Company change successfully");
+        return ResponseEntityBuilder.buildResponseEntityObjet(null, 200, "CompanyResponse change successfully");
     }
 
 }

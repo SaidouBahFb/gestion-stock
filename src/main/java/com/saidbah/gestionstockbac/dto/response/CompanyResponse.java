@@ -1,6 +1,5 @@
 package com.saidbah.gestionstockbac.dto.response;
 
-import com.saidbah.gestionstockbac.entity.Company;
 import com.saidbah.gestionstockbac.entity.Status;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class FullCompanyResponse {
+public class CompanyResponse {
 
     private Long id;
 

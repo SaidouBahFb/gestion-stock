@@ -1,8 +1,7 @@
 package com.saidbah.gestionstockbac.service.Impl;
 
 import com.saidbah.gestionstockbac.dto.request.CompanyRequest;
-import com.saidbah.gestionstockbac.dto.response.FullCompanyResponse;
-import com.saidbah.gestionstockbac.entity.Company;
+import com.saidbah.gestionstockbac.dto.response.CompanyResponse;
 import com.saidbah.gestionstockbac.entity.Status;
 import com.saidbah.gestionstockbac.exception.EntityAlreadyExistsException;
 import com.saidbah.gestionstockbac.exception.EntityNotFoundException;
@@ -21,20 +20,20 @@ import java.util.stream.Collectors;
 public class CompanyServiceImpl implements CompanyService {
     private final CompanyRepository companyRepository;
     @Override
-    public FullCompanyResponse create(CompanyRequest request) {
+    public CompanyResponse create(CompanyRequest request) {
 
         if (companyRepository.existsByEmail(request.getEmail())) {
             throw new EntityAlreadyExistsException("Email already in use", 400);
         }
 
         if (companyRepository.existsByName(request.getName())) {
-            throw new EntityAlreadyExistsException("Company name already in use", 400);
+            throw new EntityAlreadyExistsException("CompanyResponse name already in use", 400);
         }
 
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         String currentUserEmail = userDetails.getUsername();
 
-        var company = Company.builder()
+        var company = com.saidbah.gestionstockbac.entity.Company.builder()
                 .name(request.getName())
                 .description(request.getDescription())
                 .email(request.getEmail())
@@ -47,7 +46,7 @@ public class CompanyServiceImpl implements CompanyService {
                 .build();
         companyRepository.save(company);
 
-        return FullCompanyResponse.builder()
+        return CompanyResponse.builder()
                 .id(company.getId())
                 .name(company.getName())
                 .description(company.getDescription())
@@ -62,10 +61,10 @@ public class CompanyServiceImpl implements CompanyService {
     }
 
     @Override
-    public List<FullCompanyResponse> getAllCompanies() {
-        List<Company> companies = companyRepository.findAll();
-        List<FullCompanyResponse> response = companies.stream()
-                .map(company -> FullCompanyResponse.builder()
+    public List<CompanyResponse> getAllCompanies() {
+        List<com.saidbah.gestionstockbac.entity.Company> companies = companyRepository.findAll();
+        List<CompanyResponse> response = companies.stream()
+                .map(company -> CompanyResponse.builder()
                         .id(company.getId())
                         .name(company.getName())
                         .description(company.getDescription())
@@ -84,9 +83,9 @@ public class CompanyServiceImpl implements CompanyService {
     }
 
     @Override
-    public FullCompanyResponse updateCompany(Long id, CompanyRequest request) {
+    public CompanyResponse updateCompany(Long id, CompanyRequest request) {
         if (!companyRepository.existsById(id)) {
-            throw new EntityNotFoundException("Company with ID " + id +" not found", 404);
+            throw new EntityNotFoundException("CompanyResponse with ID " + id +" not found", 404);
         }
 
         var company = companyRepository.findByEmail(request.getEmail()).orElse(null);
@@ -104,7 +103,7 @@ public class CompanyServiceImpl implements CompanyService {
 
         companyRepository.save(company);
 
-        return FullCompanyResponse.builder()
+        return CompanyResponse.builder()
                 .id(company.getId())
                 .name(company.getName())
                 .description(company.getDescription())
@@ -120,8 +119,8 @@ public class CompanyServiceImpl implements CompanyService {
 
     @Override
     public void changeCompanyStatus(Long id, String status) {
-        Company company = companyRepository.findById(id).orElseThrow(
-                () -> new EntityNotFoundException("Company with ID " + id + " not found",  404)
+        com.saidbah.gestionstockbac.entity.Company company = companyRepository.findById(id).orElseThrow(
+                () -> new EntityNotFoundException("CompanyResponse with ID " + id + " not found",  404)
         );
         company.setStatus(Status.valueOf(status));
         companyRepository.save(company);

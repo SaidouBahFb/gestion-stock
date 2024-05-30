@@ -1,10 +1,8 @@
 package com.saidbah.gestionstockbac.service.Impl;
 
 import com.saidbah.gestionstockbac.dto.request.UserRequest;
-import com.saidbah.gestionstockbac.dto.response.PartialCompanyResponse;
-import com.saidbah.gestionstockbac.dto.response.FullCompanyResponse;
+import com.saidbah.gestionstockbac.dto.response.CompanyResponse;
 import com.saidbah.gestionstockbac.dto.response.UserResponse;
-import com.saidbah.gestionstockbac.entity.Company;
 import com.saidbah.gestionstockbac.entity.Status;
 import com.saidbah.gestionstockbac.entity.User;
 import com.saidbah.gestionstockbac.exception.EntityAlreadyExistsException;
@@ -38,11 +36,20 @@ public class UserServiceImpl implements UserService {
 
         List<UserResponse> responses = users.stream()
                 .map(user -> {
-                    Company company = user.getCompany();
-                    PartialCompanyResponse response = PartialCompanyResponse
+                    com.saidbah.gestionstockbac.entity.Company company = user.getCompany();
+                    CompanyResponse response = CompanyResponse
                             .builder()
                             .id(company != null ? company.getId() : null)
                             .name(company !=null ? company.getName(): null)
+                            .email(company != null ? company.getEmail() : null)
+                            .address(company != null ? company.getAddress() : null)
+                            .city(company != null ? company.getCity() : null)
+                            .country(company != null ? company.getCountry() : null)
+                            .photo(company != null ? company.getPhoto() : null)
+                            .phone(company != null ? company.getPhone() : null)
+                            .createdBy(company != null ? company.getCreatedBy() : null)
+                            .createdAt(company != null ? String.valueOf(company.getCreatedAt()) : null)
+                            .status(company != null ? company.getStatus() : null)
                             .build();
                     return UserResponse.builder()
                             .id(user.getId())
@@ -56,7 +63,7 @@ public class UserServiceImpl implements UserService {
                             .address(user.getAddress())
                             .photo(user.getPhoto())
                             .createdBy(user.getCreatedBy())
-                            .companyResponse(response)
+                            .company(response)
                             .build();
                 })
                 .collect(Collectors.toList());
@@ -76,7 +83,7 @@ public class UserServiceImpl implements UserService {
             );
         }
 
-        Company company = companyRepository.findById(request.getCompanyId())
+        com.saidbah.gestionstockbac.entity.Company company = companyRepository.findById(request.getCompanyId())
                 .orElseThrow(() -> new EntityNotFoundException(
                         StatusCode.COMPANY_NOT_FOUND.getMessage(),
                         StatusCode.COMPANY_NOT_FOUND.getCode())
@@ -95,7 +102,7 @@ public class UserServiceImpl implements UserService {
                 .company(company)
                 .build();
 
-        FullCompanyResponse companyResponse = FullCompanyResponse.builder()
+        CompanyResponse companyResponse = CompanyResponse.builder()
                 .id(company != null ? company.getId() : null)
                 .name(company !=null ? company.getName(): null)
                 .email(company != null ? company.getEmail() : null)
@@ -118,7 +125,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<UserResponse> getUserByCompany(Long companyId) {
-        Company company = companyRepository.findById(companyId).orElseThrow(
+        com.saidbah.gestionstockbac.entity.Company company = companyRepository.findById(companyId).orElseThrow(
                 () -> new EntityNotFoundException(
                         StatusCode.COMPANY_NOT_FOUND.getMessage(),
                         StatusCode.COMPANY_NOT_FOUND.getCode()
@@ -160,7 +167,7 @@ public class UserServiceImpl implements UserService {
                     StatusCode.USER_ALREADY_EXISTS.getCode()
             );
         }
-        Company company = companyRepository.findById(request.getCompanyId())
+        com.saidbah.gestionstockbac.entity.Company company = companyRepository.findById(request.getCompanyId())
                         .orElseThrow(() -> new EntityNotFoundException
                                 (
                                     StatusCode.COMPANY_NOT_FOUND.getMessage(),
@@ -178,7 +185,7 @@ public class UserServiceImpl implements UserService {
 
         userRepository.save(user);
 
-        PartialCompanyResponse companyResponse = PartialCompanyResponse.builder()
+        CompanyResponse companyResponse = CompanyResponse.builder()
                 .id(company != null ? company.getId() : null)
                 .name(company !=null ? company.getName(): null)
                 .build();
@@ -194,7 +201,7 @@ public class UserServiceImpl implements UserService {
                 .roles(user.getRoles().stream().map(Enum::name).collect(Collectors.toList()))
                 .status(user.getStatus())
                 .createdBy(user.getCreatedBy())
-                .companyResponse(companyResponse)
+                .company(companyResponse)
                 .build();
     }
 

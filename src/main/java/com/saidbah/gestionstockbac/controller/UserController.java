@@ -4,8 +4,11 @@ import com.saidbah.gestionstockbac.apiResponse.ApiResponse;
 import com.saidbah.gestionstockbac.dto.request.UserRequest;
 import com.saidbah.gestionstockbac.dto.response.UserResponse;
 import com.saidbah.gestionstockbac.exception.StatusCode;
+import com.saidbah.gestionstockbac.service.Impl.LogService;
 import com.saidbah.gestionstockbac.service.UserService;
+import com.saidbah.gestionstockbac.utils.Helpers;
 import com.saidbah.gestionstockbac.utils.ResponseEntityBuilder;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,18 +21,23 @@ import java.util.List;
 public class UserController {
 
     private final UserService userService;
+    private final LogService logService;
 
     @GetMapping("/all")
-    public ResponseEntity<ApiResponse<List<UserResponse>>> getAllUsers() {
+    @Operation(summary = "Lister tous les utilisateur", description = "Cet enpoint permet de lister tous les utilisateurs")
+    public ResponseEntity getAllUsers() {
         List<UserResponse> users = userService.getAllUsers();
-        return ResponseEntityBuilder.buildResponseEntityList(
-                users,
-                StatusCode.USER_RETRIEVED_SUCCESSFULLY.getCode(),
-                StatusCode.USER_RETRIEVED_SUCCESSFULLY.getMessage()
+        logService.log(Helpers.LogLevel.INFO, "@UserController-getAllUsers", "Liste de tous les utilisateurs récupérés avec succèss");
+        return ResponseEntity.ok().body(
+                new ApiResponse(
+                        users,
+                        StatusCode.USER_RETRIEVED_SUCCESSFULLY.getCode(),
+                        StatusCode.USER_RETRIEVED_SUCCESSFULLY.getMessage()
+                )
         );
     }
 
-    @GetMapping("/users-by-company/{id}")
+    @GetMapping("/users-by-companyResponse/{id}")
     public ResponseEntity<ApiResponse<List<UserResponse>>> getUsersByCompany(@PathVariable Long id) {
         List<UserResponse> users = userService.getUserByCompany(id);
         return ResponseEntityBuilder.buildResponseEntityList(

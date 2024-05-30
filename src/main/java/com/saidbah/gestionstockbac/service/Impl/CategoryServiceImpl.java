@@ -41,7 +41,7 @@ public class CategoryServiceImpl implements CategoryService {
         );
 
         Company company = companyRepository.findById(user.getCompany().getId()).orElseThrow(
-                () -> new EntityNotFoundException("Company not found", 400)
+                () -> new EntityNotFoundException("CompanyResponse not found", 400)
         );
 
         var category = Category.builder()

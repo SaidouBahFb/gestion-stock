@@ -9,6 +9,7 @@ import com.saidbah.gestionstockbac.repository.UserRepository;
 import com.saidbah.gestionstockbac.service.AuthService;
 import com.saidbah.gestionstockbac.service.Impl.LogService;
 import com.saidbah.gestionstockbac.utils.Helpers;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -33,11 +34,12 @@ public class AuthenticationController {
     private final AuthService authenticationService;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final Path location = Paths.get("D:\\images\\users");
+    private final Path location = Paths.get("D:\\inventory-management\\users");
     private Path fileLocation;
     private final LogService logService;
 
     @PostMapping("/register")
+    @Operation(summary = "Enregistrer un nouvel utilisateur", description = "Cet endpoint permet d'enregistrer un nouvel utilisateur avec les détails fournis.")
     public ResponseEntity register(
             @RequestBody RegisterRequest request
     ) {
@@ -48,6 +50,7 @@ public class AuthenticationController {
     }
 
     @PostMapping("/authenticate")
+    @Operation(summary = "S'authentifier", description = "Cet endpoint permet de s'authentifier à l'application.")
     public ResponseEntity authenticate(
             @RequestBody AuthenticationRequest request
     ){
@@ -58,7 +61,7 @@ public class AuthenticationController {
     }
 
     @PostMapping("/download-img/{userId}")
-    public ResponseEntity<ApiResponse<Object>> downloadImg(
+    public ResponseEntity downloadImg(
             @RequestParam("photo") MultipartFile img,
             @PathVariable Long userId
     ) throws IOException {
@@ -75,11 +78,7 @@ public class AuthenticationController {
         User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("User not found"));
         user.setPhoto(fileLocation.toString());
         userRepository.save(user);
-
-        return ResponseEntity.ok(ApiResponse.<Object>builder()
-                .data(fileLocation.toString())
-                .statusCode(200)
-                .message("Photo uploaded successfully")
-                .build());
+        logService.log(Helpers.LogLevel.INFO, "@AuthenticationController-download-img", "L'image de l'utilisateur a été enregistré avec succès");
+        return ResponseEntity.ok().body(new ApiResponse(fileLocation.toString(), 200, "Photo téléchargée avec succès" ));
     }
 }

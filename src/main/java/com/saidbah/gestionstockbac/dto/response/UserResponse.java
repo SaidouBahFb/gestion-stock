@@ -33,8 +33,6 @@ public class UserResponse {
 
     private String createdBy;
 
-    private PartialCompanyResponse companyResponse;
-
-    private FullCompanyResponse company;
+    private CompanyResponse company;
 
 }
