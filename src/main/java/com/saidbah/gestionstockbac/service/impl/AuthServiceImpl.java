@@ -1,4 +1,4 @@
-package com.saidbah.gestionstockbac.service.Impl;
+package com.saidbah.gestionstockbac.service.impl;
 
 import com.saidbah.gestionstockbac.config.JwtService;
 import com.saidbah.gestionstockbac.dto.request.AuthenticationRequest;
@@ -18,8 +18,6 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -59,7 +57,7 @@ public class AuthServiceImpl implements AuthService {
                 .lastname(user.getLastname())
                 .phone(user.getPhone())
                 .address(user.getAddress())
-                .roles(user.getRoles().stream().map(Enum::name).collect(Collectors.toList()))
+                .roles(user.getRoles().stream().map(Enum::name).toList())
                 .status(user.getStatus())
                 .build();
     }
@@ -99,7 +97,7 @@ public class AuthServiceImpl implements AuthService {
                 .email(user.getEmail())
                 .phone(user.getPhone())
                 .address(user.getAddress())
-                .roles(user.getRoles().stream().map(Enum::name).collect(Collectors.toList()))
+                .roles(user.getRoles().stream().map(Enum::name).toList())
                 .status(user.getStatus())
                 .build();
     }

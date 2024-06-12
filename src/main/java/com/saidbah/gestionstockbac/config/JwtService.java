@@ -1,5 +1,6 @@
 package com.saidbah.gestionstockbac.config;
 
+import com.saidbah.gestionstockbac.entity.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
@@ -11,7 +12,6 @@ import io.jsonwebtoken.Jwts;
 import java.security.Key;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -20,7 +20,8 @@ import java.util.function.Function;
 @Service
 public class JwtService {
 
-    private static final String SECRET_KEY = "d4a143ef146e6c1aa84c849dde3cec1907af9fde36a48a4383209bcd1a6dc354";
+    private static final String SECRET_KEY = "ngeqPG7YfsPgCQLXPdincxq92V/C+Y6xe9OOyGJeTKqVhlzNyCFKhoIBLgQKlFqlebT3gycnmlZt+CS73UdO1cgi5yGaHZnnIAoDn5uPDVxW10b5pZXCXPc2KmD70IBPp9XJ7Xm0fCSCeR5XnMFEWxbU5NQtMQyYeZu47KP2TuhKWXnyoPdMZT/f5QUCSgTr2vzM50MgmByyfJ/JUd95uFGfo/Qy8yBw+5mAFTUwbJscJnQhSmMH8eyIURv+cWj9xj/7+QC92X5yS4C4apfUvMw5O4YwtXGv5/rEncr9bb2jG1aJyGSX2StFuytHoEv+7t6Vw2u4TCJUHAylz4vaL6vNgrP5TIZNYuZTVZpNGMifUXkMjLRJdaZorZbHlHLteJuNs2FMqmYN2g3EVQBByKmeBeQakGKGjpUA8sjBRMUgvuCueOkuVh0h6UG3Ki0eizd1PtnhG2U43TlMrJLdF91aGvd2C0eBtpq/DHssKLxlJOHwDxpKTPfr8mZvUslD8Rk1uKb6j3EAphXjO9l7IlV9aQPJqdHbGb3zPsMn8EuAJExbuBvw3YLgu3XVE9Jc6+Yl2wr+8uQPDv1TyPHHbttIVPTy6GBh747/mDfvPPrsbzN4tE8fsYRyB31PJFUgnz/JacsDl+DO+VYkYA+Y1x2m9jra51quW2YXnePJivc";
+
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
     }
@@ -31,62 +32,38 @@ public class JwtService {
     }
 
     public String generateToken(UserDetails userDetails) {
-        return generateToken(new HashMap<>(), userDetails);
-    }
+        if (!(userDetails instanceof User user)) {
+            throw new IllegalArgumentException("UserDetails must be an instance of User");
+        }
 
-    /*public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
-        return Jwts
-                .builder()
-                .setClaims(extraClaims)
-                .setSubject(userDetails.getUsername())
-                .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 24))
-                .signWith(getSignInKey(), SignatureAlgorithm.HS256)
-                .compact();
-    }*/
+        Map<String, Object> extraClaims = new HashMap<>();
+        extraClaims.put("roles", user.getRoles().stream().map(Enum::name).toList());
+        extraClaims.put("firstname", user.getFirstname());
+        extraClaims.put("lastname", user.getLastname());
+        extraClaims.put("phone", user.getPhone());
+        extraClaims.put("address", user.getAddress());
 
-    /*public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.add(Calendar.HOUR_OF_DAY, 24); // Ajoute 24 heures à la date actuelle
-        Date expirationDate = calendar.getTime();
-
-        return Jwts.builder()
-                .setClaims(extraClaims)
-                .setSubject(userDetails.getUsername())
-                .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(expirationDate) // Utilise la date d'expiration calculée
-                .signWith(getSignInKey(), SignatureAlgorithm.HS256)
-                .compact();
-    }*/
-
-    public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
         Instant now = Instant.now();
         Instant expirationTime = now.plus(24, ChronoUnit.HOURS);
 
         return Jwts.builder()
                 .setClaims(extraClaims)
-                .setSubject(userDetails.getUsername())
+                .setSubject(user.getUsername())
                 .setIssuedAt(Date.from(now))
                 .setExpiration(Date.from(expirationTime))
                 .signWith(getSignInKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
 
-
     public boolean isTokenValid(String token, UserDetails userDetails) {
         final String username = extractUsername(token);
         return (username.equals(userDetails.getUsername())) && !isTokenExpired(token);
     }
 
-    /*private boolean isTokenExpired(String token) {
-        return extractExpiration(token).before(new Date());
-    }*/
-
     private boolean isTokenExpired(String token) {
         Date expirationDate = extractExpiration(token);
         return expirationDate.before(new Date());
     }
-
 
     private Date extractExpiration(String token) {
         return extractClaim(token, Claims::getExpiration);

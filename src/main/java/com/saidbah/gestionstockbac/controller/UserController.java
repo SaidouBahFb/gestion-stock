@@ -4,7 +4,7 @@ import com.saidbah.gestionstockbac.apiResponse.ApiResponse;
 import com.saidbah.gestionstockbac.dto.request.UserRequest;
 import com.saidbah.gestionstockbac.dto.response.UserResponse;
 import com.saidbah.gestionstockbac.exception.StatusCode;
-import com.saidbah.gestionstockbac.service.Impl.LogService;
+import com.saidbah.gestionstockbac.service.impl.LogService;
 import com.saidbah.gestionstockbac.service.UserService;
 import com.saidbah.gestionstockbac.utils.Helpers;
 import com.saidbah.gestionstockbac.utils.ResponseEntityBuilder;

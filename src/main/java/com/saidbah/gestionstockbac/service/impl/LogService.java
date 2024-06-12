@@ -1,4 +1,4 @@
-package com.saidbah.gestionstockbac.service.Impl;
+package com.saidbah.gestionstockbac.service.impl;
 
 import com.saidbah.gestionstockbac.utils.Helpers;
 import org.slf4j.Logger;

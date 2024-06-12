@@ -1,4 +1,4 @@
-package com.saidbah.gestionstockbac.service.Impl;
+package com.saidbah.gestionstockbac.service.impl;
 
 import com.saidbah.gestionstockbac.dto.request.UserRequest;
 import com.saidbah.gestionstockbac.dto.response.CompanyResponse;

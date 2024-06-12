@@ -3,11 +3,12 @@ package com.saidbah.gestionstockbac.controller;
 import com.saidbah.gestionstockbac.apiResponse.ApiResponse;
 import com.saidbah.gestionstockbac.dto.request.AuthenticationRequest;
 import com.saidbah.gestionstockbac.dto.request.RegisterRequest;
+import com.saidbah.gestionstockbac.dto.response.AuthenticationResponse;
 import com.saidbah.gestionstockbac.entity.User;
 import com.saidbah.gestionstockbac.exception.StatusCode;
 import com.saidbah.gestionstockbac.repository.UserRepository;
 import com.saidbah.gestionstockbac.service.AuthService;
-import com.saidbah.gestionstockbac.service.Impl.LogService;
+import com.saidbah.gestionstockbac.service.impl.LogService;
 import com.saidbah.gestionstockbac.utils.Helpers;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.persistence.EntityNotFoundException;
@@ -40,28 +41,29 @@ public class AuthenticationController {
 
     @PostMapping("/register")
     @Operation(summary = "Enregistrer un nouvel utilisateur", description = "Cet endpoint permet d'enregistrer un nouvel utilisateur avec les détails fournis.")
-    public ResponseEntity register(
+    public ResponseEntity<ApiResponse<AuthenticationResponse>> register(
             @RequestBody RegisterRequest request
     ) {
         var response = authenticationService.register(request);
         logService.log(Helpers.LogLevel.INFO, "@AuthenticationController-register", "L'utilisateur a été ajouté avec succès.");
-        return ResponseEntity.ok().body(new ApiResponse(response, StatusCode.USER_REGISTER_SUCCESSFULLY.getCode(),
+        return ResponseEntity.ok().body(new ApiResponse<>(response, StatusCode.USER_REGISTER_SUCCESSFULLY.getCode(),
                 StatusCode.USER_REGISTER_SUCCESSFULLY.getMessage()));
     }
 
+
     @PostMapping("/authenticate")
     @Operation(summary = "S'authentifier", description = "Cet endpoint permet de s'authentifier à l'application.")
-    public ResponseEntity authenticate(
+    public ResponseEntity<ApiResponse<AuthenticationResponse>> authenticate(
             @RequestBody AuthenticationRequest request
     ){
         var response = authenticationService.authenticate(request);
         logService.log(Helpers.LogLevel.INFO, "@AuthenticationController-authenticate", "L'utilisateur connecté(e) avec succès.");
-        return   ResponseEntity.ok().body(new ApiResponse(response, StatusCode.USER_AUTHENTICATED_SUCCESSFULLY.getCode(),
+        return   ResponseEntity.ok().body(new ApiResponse<>(response, StatusCode.USER_AUTHENTICATED_SUCCESSFULLY.getCode(),
                 StatusCode.USER_AUTHENTICATED_SUCCESSFULLY.getMessage()));
     }
 
     @PostMapping("/download-img/{userId}")
-    public ResponseEntity downloadImg(
+    public ResponseEntity<ApiResponse<String>> downloadImg(
             @RequestParam("photo") MultipartFile img,
             @PathVariable Long userId
     ) throws IOException {
@@ -71,7 +73,7 @@ public class AuthenticationController {
 
         String randomFileName = userId.toString() + "_" + UUID.randomUUID().toString()  + "_" + formattedDate + "_" + img.getOriginalFilename();
 
-        Path fileLocation = this.location.resolve(randomFileName);
+        fileLocation = this.location.resolve(randomFileName);
 
         Files.copy(img.getInputStream(), fileLocation, StandardCopyOption.REPLACE_EXISTING);
 
@@ -79,6 +81,6 @@ public class AuthenticationController {
         user.setPhoto(fileLocation.toString());
         userRepository.save(user);
         logService.log(Helpers.LogLevel.INFO, "@AuthenticationController-download-img", "L'image de l'utilisateur a été enregistré avec succès");
-        return ResponseEntity.ok().body(new ApiResponse(fileLocation.toString(), 200, "Photo téléchargée avec succès" ));
+        return ResponseEntity.ok().body(new ApiResponse<>(fileLocation.toString(), 200, "Photo téléchargée avec succès" ));
     }
 }
