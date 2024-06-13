@@ -119,7 +119,6 @@ class AuthServiceImplTest {
 
         when(userRepository.findByEmail(request.getEmail())).thenReturn(Optional.empty());
 
-        // Act & Assert
         EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
                 () -> authService.authenticate(request));
         assertEquals(StatusCode.USER_EMAIL_OR_PASSWORD_INVALID.getMessage(), exception.getMessage());
@@ -128,7 +127,6 @@ class AuthServiceImplTest {
 
     @Test
     void authenticate_shouldThrowException_whenPasswordDoesNotMatch() {
-        // Arrange
         AuthenticationRequest request = AuthenticationRequest.builder()
                 .email("user.user@example.com")
                 .password("password")
@@ -142,7 +140,6 @@ class AuthServiceImplTest {
         when(userRepository.findByEmail(request.getEmail())).thenReturn(Optional.of(user));
         when(passwordEncoder.matches(request.getPassword(), user.getPassword())).thenReturn(false);
 
-        // Act & Assert
         EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
                 () -> authService.authenticate(request));
         assertEquals(StatusCode.USER_EMAIL_OR_PASSWORD_INVALID.getMessage(), exception.getMessage());
@@ -151,7 +148,6 @@ class AuthServiceImplTest {
 
     @Test
     void authenticate_shouldThrowException_whenUserIsInactive() {
-        // Arrange
         AuthenticationRequest request = AuthenticationRequest.builder()
                 .email("user.user@example.com")
                 .password("password")
@@ -166,7 +162,6 @@ class AuthServiceImplTest {
         when(userRepository.findByEmail(request.getEmail())).thenReturn(Optional.of(user));
         when(passwordEncoder.matches(request.getPassword(), user.getPassword())).thenReturn(true);
 
-        // Act & Assert
         EntityInactiveException exception = assertThrows(EntityInactiveException.class,
                 () -> authService.authenticate(request));
         assertEquals(StatusCode.USER_INACTIVE.getMessage(), exception.getMessage());
@@ -175,7 +170,6 @@ class AuthServiceImplTest {
 
     @Test
     void authenticate_shouldReturnResponse_whenCredentialsAreValid() {
-        // Arrange
         AuthenticationRequest request = AuthenticationRequest.builder()
                 .email("user.user@example.com")
                 .password("password")
@@ -197,10 +191,8 @@ class AuthServiceImplTest {
         when(passwordEncoder.matches(request.getPassword(), user.getPassword())).thenReturn(true);
         when(jwtService.generateToken(user)).thenReturn("jwtToken");
 
-        // Act
         AuthenticationResponse response = authService.authenticate(request);
 
-        // Assert
         assertNotNull(response);
         assertEquals("jwtToken", response.getToken());
         assertEquals("user", response.getFirstname());
