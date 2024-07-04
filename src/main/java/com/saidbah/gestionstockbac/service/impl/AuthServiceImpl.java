@@ -55,6 +55,7 @@ public class AuthServiceImpl implements AuthService {
                 .id(user.getId())
                 .firstname(user.getFirstname())
                 .lastname(user.getLastname())
+                .email(user.getEmail())
                 .phone(user.getPhone())
                 .address(user.getAddress())
                 .roles(user.getRoles().stream().map(Enum::name).toList())
