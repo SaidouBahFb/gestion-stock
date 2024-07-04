@@ -3,6 +3,7 @@ package com.saidbah.gestionstockbac.service.impl;
 import com.saidbah.gestionstockbac.dto.request.UserRequest;
 import com.saidbah.gestionstockbac.dto.response.CompanyResponse;
 import com.saidbah.gestionstockbac.dto.response.UserResponse;
+import com.saidbah.gestionstockbac.entity.Company;
 import com.saidbah.gestionstockbac.entity.Status;
 import com.saidbah.gestionstockbac.entity.User;
 import com.saidbah.gestionstockbac.exception.EntityAlreadyExistsException;
@@ -11,6 +12,7 @@ import com.saidbah.gestionstockbac.repository.CompanyRepository;
 import com.saidbah.gestionstockbac.repository.UserRepository;
 import com.saidbah.gestionstockbac.service.UserService;
 import com.saidbah.gestionstockbac.exception.EntityNotFoundException;
+import com.saidbah.gestionstockbac.utils.Helpers;
 import lombok.AllArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -25,32 +27,33 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class UserServiceImpl implements UserService {
 
+    private final LogService logService;
     private final UserRepository userRepository;
     private final CompanyRepository companyRepository;
     private final PasswordEncoder passwordEncoder;
 
-
     @Override
     public List<UserResponse> getAllUsers() {
-        List<User> users = userRepository.findAll();
-
-        List<UserResponse> responses = users.stream()
+        return userRepository.findAll().stream()
                 .map(user -> {
-                    com.saidbah.gestionstockbac.entity.Company company = user.getCompany();
-                    CompanyResponse response = CompanyResponse
-                            .builder()
-                            .id(company != null ? company.getId() : null)
-                            .name(company !=null ? company.getName(): null)
-                            .email(company != null ? company.getEmail() : null)
-                            .address(company != null ? company.getAddress() : null)
-                            .city(company != null ? company.getCity() : null)
-                            .country(company != null ? company.getCountry() : null)
-                            .photo(company != null ? company.getPhoto() : null)
-                            .phone(company != null ? company.getPhone() : null)
-                            .createdBy(company != null ? company.getCreatedBy() : null)
-                            .createdAt(company != null ? String.valueOf(company.getCreatedAt()) : null)
-                            .status(company != null ? company.getStatus() : null)
-                            .build();
+                    CompanyResponse companyResponse = null;
+                    if (user.getCompany() != null) {
+                        var company = user.getCompany();
+                        companyResponse = CompanyResponse.builder()
+                                .id(company.getId())
+                                .name(company.getName())
+                                .email(company.getEmail())
+                                .address(company.getAddress())
+                                .city(company.getCity())
+                                .country(company.getCountry())
+                                .photo(company.getPhoto())
+                                .phone(company.getPhone())
+                                .createdBy(company.getCreatedBy())
+                                .createdAt(String.valueOf(company.getCreatedAt()))
+                                .status(company.getStatus())
+                                .build();
+                    }
+
                     return UserResponse.builder()
                             .id(user.getId())
                             .firstname(user.getFirstname())
@@ -58,18 +61,16 @@ public class UserServiceImpl implements UserService {
                             .email(user.getEmail())
                             .photo(user.getPhoto())
                             .phone(user.getPhone())
-                            .roles(user.getRoles().stream().map(Enum::name).collect(Collectors.toList()))
+                            .roles(user.getRoles().stream().map(Enum::name).toList())
                             .status(user.getStatus())
                             .address(user.getAddress())
-                            .photo(user.getPhoto())
                             .createdBy(user.getCreatedBy())
-                            .company(response)
+                            .company(companyResponse)
                             .build();
                 })
-                .collect(Collectors.toList());
-
-        return responses;
+                .toList();
     }
+
 
     @Override
     public UserResponse create(UserRequest request) {
@@ -77,16 +78,22 @@ public class UserServiceImpl implements UserService {
         String currentUserEmail = userDetails.getUsername();
 
         if (userRepository.existsByEmail(request.getEmail())) {
+            logService.log(Helpers.LogLevel.ERROR, "@UserServiceImpl-create", "Cet utilisateur existe déjà");
             throw new EntityAlreadyExistsException(
                     StatusCode.USER_ALREADY_EXISTS.getMessage(),
                     StatusCode.USER_ALREADY_EXISTS.getCode()
             );
         }
 
-        com.saidbah.gestionstockbac.entity.Company company = companyRepository.findById(request.getCompanyId())
-                .orElseThrow(() -> new EntityNotFoundException(
-                        StatusCode.COMPANY_NOT_FOUND.getMessage(),
-                        StatusCode.COMPANY_NOT_FOUND.getCode())
+        Company company = companyRepository.findById(request.getCompanyId())
+                .orElseThrow(() ->
+                        {
+                            logService.log(Helpers.LogLevel.ERROR, "@UserServiceImpl-create", "Entreprise non trouvée : " + request.getCompanyId());
+                            return new EntityNotFoundException(
+                                    StatusCode.COMPANY_NOT_FOUND.getMessage(),
+                                    StatusCode.COMPANY_NOT_FOUND.getCode());
+                        }
+
                 );
 
         var user = User.builder()
@@ -103,9 +110,17 @@ public class UserServiceImpl implements UserService {
                 .build();
 
         CompanyResponse companyResponse = CompanyResponse.builder()
-                .id(company != null ? company.getId() : null)
-                .name(company !=null ? company.getName(): null)
-                .email(company != null ? company.getEmail() : null)
+                .id(company.getId())
+                .name(company.getName())
+                .email(company.getEmail())
+                .address(company.getAddress())
+                .phone(company.getPhone())
+                .createdAt(String.valueOf(company.getCreatedAt()))
+                .city(company.getCity())
+                .description(company.getDescription())
+                .status(company.getStatus())
+                .country(company.getCountry())
+                .createdBy(company.getCreatedBy())
                 .build();
 
         userRepository.save(user);

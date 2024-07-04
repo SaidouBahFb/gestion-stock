@@ -24,12 +24,12 @@ public class UserController {
     private final LogService logService;
 
     @GetMapping("/all")
-    @Operation(summary = "Lister tous les utilisateurs", description = "Cet enpoint permet de lister tous les utilisateurs")
-    public ResponseEntity getAllUsers() {
+    @Operation(summary = "Lister tous les utilisateurs", description = "Cet endpoint permet de lister tous les utilisateurs")
+    public ResponseEntity<ApiResponse<List<UserResponse>>> getAllUsers() {
         List<UserResponse> users = userService.getAllUsers();
-        logService.log(Helpers.LogLevel.INFO, "@UserController-getAllUsers", "Liste de tous les utilisateurs récupérés avec succèss");
+        logService.log(Helpers.LogLevel.INFO, "@UserController-getAllUsers", "Liste de tous les utilisateurs récupérés avec succès.");
         return ResponseEntity.ok().body(
-                new ApiResponse(
+                new ApiResponse<>(
                         users,
                         StatusCode.USER_RETRIEVED_SUCCESSFULLY.getCode(),
                         StatusCode.USER_RETRIEVED_SUCCESSFULLY.getMessage()
@@ -47,13 +47,12 @@ public class UserController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<ApiResponse<Object>> create(@RequestBody UserRequest request){
+    public ResponseEntity<ApiResponse<UserResponse>> create(@RequestBody UserRequest request){
         var response = userService.create(request);
-        return ResponseEntityBuilder.buildResponseEntityObjet(
-                response,
+        logService.log(Helpers.LogLevel.INFO, "@UserController-create", "L'utilisateur a été ajouté avec succès.");
+        return ResponseEntity.ok().body(new ApiResponse<>(response,
                 StatusCode.USER_ADDED_SUCCESSFULLY.getCode(),
-                StatusCode.USER_ADDED_SUCCESSFULLY.getMessage()
-        );
+                StatusCode.USER_ADDED_SUCCESSFULLY.getMessage()));
     }
 
     @PutMapping("/update/{userId}")
