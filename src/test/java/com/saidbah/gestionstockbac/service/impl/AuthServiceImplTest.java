@@ -76,26 +76,26 @@ class AuthServiceImplTest {
         RegisterRequest request = RegisterRequest.builder()
                 .firstname("user")
                 .lastname("user")
-                .email("user.user@example.com")
-                .password("password")
+                .email("user.user@gmail.com")
+                .phone("620000000")
+                .address("Conakry")
+                .password("Passer123@")
+                .roles(Collections.singletonList(Role.StockManager))
+                .status(Status.ACTIVE)
+                .photo("profile.jpg")
+                .createdBy("admin")
+                .companyId(1L)
                 .build();
 
         when(userRepository.existsByEmail(request.getEmail())).thenReturn(false);
-        when(passwordEncoder.encode(request.getPassword())).thenReturn("encodedPassword");
+        when(jwtService.generateToken(any(User.class))).thenReturn("jwtToken");
 
-        User user = User.builder()
-                .id(1L)
-                .firstname("user")
-                .lastname("user")
-                .email("user.user@example.com")
-                .phone("123456789")
-                .address("123 Street")
-                .password("encodedPassword")
-                .roles(Collections.singletonList(Role.Admin))
-                .status(Status.ACTIVE)
-                .build();
-
-        when(userRepository.save(any(User.class))).thenReturn(user);
+        // Mocking save method of UserRepository
+        when(userRepository.save(any(User.class))).thenAnswer(invocation -> {
+            User savedUser = invocation.getArgument(0);
+            savedUser.setId(1L); // Mock setting ID after save
+            return savedUser;
+        });
 
         // Act
         AuthenticationResponse response = authService.register(request);
@@ -104,10 +104,13 @@ class AuthServiceImplTest {
         assertNotNull(response);
         assertEquals("user", response.getFirstname());
         assertEquals("user", response.getLastname());
-        assertEquals("user.user@example.com", response.getEmail());
         assertEquals(Status.ACTIVE, response.getStatus());
+        assertEquals(1L, response.getId());
+        assertEquals("user.user@gmail.com", response.getEmail());
+        assertEquals(Collections.singletonList("StockManager"), response.getRoles());
         verify(userRepository).save(any(User.class));
     }
+
 
     @Test
     void authenticate_shouldThrowException_whenUserNotFound() {

@@ -24,7 +24,7 @@ public class UserController {
     private final LogService logService;
 
     @GetMapping("/all")
-    @Operation(summary = "Lister tous les utilisateur", description = "Cet enpoint permet de lister tous les utilisateurs")
+    @Operation(summary = "Lister tous les utilisateurs", description = "Cet enpoint permet de lister tous les utilisateurs")
     public ResponseEntity getAllUsers() {
         List<UserResponse> users = userService.getAllUsers();
         logService.log(Helpers.LogLevel.INFO, "@UserController-getAllUsers", "Liste de tous les utilisateurs récupérés avec succèss");
